@@ -14,16 +14,20 @@
       height: 100vh;
       margin: 0;
       color: #333;
+      position: relative; /* Needed for absolute button positioning */
+      overflow: hidden;   /* Keep buttons inside screen */
     }
 
     h1 {
       color: #92C7CF;
       margin-bottom: 30px;
+      text-align: center;
     }
 
     .buttons {
       display: flex;
       gap: 20px;
+      position: relative;
     }
 
     button {
@@ -36,6 +40,11 @@
       font-weight: bold;
       color: #333;
       transition: 0.3s;
+      position: absolute; /* So we can move the No button */
+    }
+
+    #yesBtn {
+      position: static; /* Keep Yes button fixed */
     }
 
     button:hover {
@@ -73,14 +82,25 @@
     let index = 0;
 
     noBtn.addEventListener("click", () => {
+      // Change text
       noBtn.textContent = messages[index];
       index = (index + 1) % messages.length;
+
+      // Move to random spot inside window
+      const maxX = window.innerWidth - noBtn.offsetWidth;
+      const maxY = window.innerHeight - noBtn.offsetHeight;
+      const randomX = Math.floor(Math.random() * maxX);
+      const randomY = Math.floor(Math.random() * maxY);
+
+      noBtn.style.left = randomX + "px";
+      noBtn.style.top = randomY + "px";
     });
 
     yesBtn.addEventListener("click", () => {
       catGif.style.display = "block";
       document.getElementById("question").textContent = "Good girl, now sleep well 💖";
-      document.querySelector(".buttons").style.display = "none";
+      noBtn.style.display = "none";
+      yesBtn.style.display = "none";
     });
   </script>
 </body>
