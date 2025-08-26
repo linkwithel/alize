@@ -1,120 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Alize Go To Sleep</title>
   <style>
-    body {
-      background-color: #FBF9F1;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      color: #333;
-      position: relative; /* Needed for absolute positioning */
-      overflow: hidden;   /* Prevent buttons going outside screen */
+    :root{
+      --blue-1:#92C7CF; /* heading / hover */
+      --blue-2:#AAD7D9; /* buttons */
+      --cream:#FBF9F1;  /* background */
+      --stone:#E5E1DA;  /* card */
+      --text:#333333;
     }
 
-    h1 {
-      color: #92C7CF;
-      margin-bottom: 30px;
-      text-align: center;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--cream);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      padding:16px;
     }
 
-    .buttons {
-      display: flex;
-      gap: 20px;
-      position: relative;
+    .card{
+      width:min(560px, 92vw);
+      background:var(--stone);
+      border-radius:20px;
+      padding:28px 24px;
+      box-shadow:0 8px 24px rgba(0,0,0,.08);
+      text-align:center;
     }
 
-    button {
-      background-color: #AAD7D9;
-      border: none;
-      padding: 12px 25px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-      transition: 0.2s;
-      position: absolute; /* For the No button */
+    h1{
+      margin:0 0 20px;
+      color:var(--blue-1);
+      font-size:clamp(22px, 3.5vw, 32px);
+      line-height:1.2;
     }
 
-    #yesBtn {
-      position: static; /* Keep Yes fixed */
+    .buttons{
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      flex-wrap:wrap;
     }
 
-    button:hover {
-      background-color: #92C7CF;
+    button{
+      appearance:none;
+      border:none;
+      border-radius:14px;
+      padding:12px 22px;
+      font-weight:700;
+      font-size:16px;
+      color:var(--text);
+      background:var(--blue-2);
+      cursor:pointer;
+      transition:transform .15s ease, background-color .15s ease, opacity .15s ease;
+      white-space:nowrap; /* keep messages on one line while shrinking */
+    }
+    button:hover{ background:var(--blue-1); }
+
+    #catGif{
+      display:none;
+      margin-top:18px;
+      max-width:220px;
+      width:100%;
+      border-radius:14px;
+      box-shadow:0 6px 16px rgba(0,0,0,.15);
     }
 
-    #catGif {
-      margin-top: 30px;
-      display: none;
-      max-width: 250px;
-      border-radius: 12px;
-      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    .foot{
+      margin-top:10px;
+      font-size:12px;
+      opacity:.7;
     }
   </style>
 </head>
 <body>
-  <h1 id="question">Alize, go to sleep?</h1>
-  <div class="buttons">
-    <button id="yesBtn">Yes</button>
-    <button id="noBtn">No</button>
-  </div>
-  <img id="catGif" src="https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif" alt="Happy Cat">
-  
+  <main class="card">
+    <h1 id="question">Alize go to sleep</h1>
+
+    <div class="buttons" id="btnRow">
+      <button id="yesBtn" type="button">Yes</button>
+      <button id="noBtn" type="button">No</button>
+    </div>
+
+    <img
+      id="catGif"
+      src="https://media.giphy.com/media/MDJ9IbxxvDUQM/giphy.gif"
+      alt="Happy cat celebrating good sleep."
+    />
+
+    <div class="foot" id="hint">This won’t end until you choose “Yes.”</div>
+  </main>
+
   <script>
-    const noBtn = document.getElementById("noBtn");
-    const yesBtn = document.getElementById("yesBtn");
-    const catGif = document.getElementById("catGif");
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn  = document.getElementById('noBtn');
+    const catGif = document.getElementById('catGif');
+    const question = document.getElementById('question');
+    const hint = document.getElementById('hint');
+    const btnRow = document.getElementById('btnRow');
 
     const messages = [
-      "u need to go",
-      "stop being stubborn",
-      "go rest",
-      "stop lurking, click yes"
+      'u need to go',
+      'stop being stubborn',
+      'go rest',
+      'stop lurking, click yes'
     ];
-    let index = 0;
-    let size = 1; // scale factor for No button
+    let msgIndex = 0;
+    let noScale = 1; // current scale for No button
 
-    function moveNoBtn() {
-      const maxX = window.innerWidth - noBtn.offsetWidth;
-      const maxY = window.innerHeight - noBtn.offsetHeight;
-      const randomX = Math.floor(Math.random() * maxX);
-      const randomY = Math.floor(Math.random() * maxY);
-
-      noBtn.style.left = randomX + "px";
-      noBtn.style.top = randomY + "px";
+    function shrinkNo(){
+      noScale = Math.max(0.35, noScale - 0.1);   // don’t let it disappear
+      noBtn.style.transform = `scale(${noScale})`;
+      // optional: fade slightly as it shrinks
+      noBtn.style.opacity = String(0.6 + (noScale - 0.35) * (0.4 / 0.65));
     }
 
-    noBtn.addEventListener("click", () => {
-      // Change text
-      noBtn.textContent = messages[index];
-      index = (index + 1) % messages.length;
+    noBtn.addEventListener('click', () => {
+      // cycle message text
+      noBtn.textContent = messages[msgIndex];
+      msgIndex = (msgIndex + 1) % messages.length;
 
-      // Shrink button slightly each time
-      size -= 0.1;
-      if (size < 0.3) size = 0.3; // don’t let it vanish completely
-      noBtn.style.transform = `scale(${size})`;
-
-      // Move away
-      moveNoBtn();
+      // shrink the No button each time it's chosen
+      shrinkNo();
     });
 
-    noBtn.addEventListener("mouseover", () => {
-      moveNoBtn();
-    });
-
-    yesBtn.addEventListener("click", () => {
-      catGif.style.display = "block";
-      document.getElementById("question").textContent = "Good girl, now sleep well 💖";
-      noBtn.style.display = "none";
-      yesBtn.style.display = "none";
+    yesBtn.addEventListener('click', () => {
+      // success state
+      question.textContent = 'Good girl, now sleep well 💖';
+      btnRow.style.display = 'none';
+      hint.style.display = 'none';
+      catGif.style.display = 'block';
     });
   </script>
 </body>
