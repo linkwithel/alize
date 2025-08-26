@@ -14,8 +14,8 @@
       height: 100vh;
       margin: 0;
       color: #333;
-      position: relative; /* Needed for absolute button positioning */
-      overflow: hidden;   /* Keep buttons inside screen */
+      position: relative; /* Needed for absolute positioning */
+      overflow: hidden;   /* Prevent buttons going outside screen */
     }
 
     h1 {
@@ -39,12 +39,12 @@
       font-size: 16px;
       font-weight: bold;
       color: #333;
-      transition: 0.3s;
-      position: absolute; /* So we can move the No button */
+      transition: 0.2s;
+      position: absolute; /* For the No button */
     }
 
     #yesBtn {
-      position: static; /* Keep Yes button fixed */
+      position: static; /* Keep Yes fixed */
     }
 
     button:hover {
@@ -80,13 +80,9 @@
       "stop lurking, click yes"
     ];
     let index = 0;
+    let size = 1; // scale factor for No button
 
-    noBtn.addEventListener("click", () => {
-      // Change text
-      noBtn.textContent = messages[index];
-      index = (index + 1) % messages.length;
-
-      // Move to random spot inside window
+    function moveNoBtn() {
       const maxX = window.innerWidth - noBtn.offsetWidth;
       const maxY = window.innerHeight - noBtn.offsetHeight;
       const randomX = Math.floor(Math.random() * maxX);
@@ -94,6 +90,24 @@
 
       noBtn.style.left = randomX + "px";
       noBtn.style.top = randomY + "px";
+    }
+
+    noBtn.addEventListener("click", () => {
+      // Change text
+      noBtn.textContent = messages[index];
+      index = (index + 1) % messages.length;
+
+      // Shrink button slightly each time
+      size -= 0.1;
+      if (size < 0.3) size = 0.3; // don’t let it vanish completely
+      noBtn.style.transform = `scale(${size})`;
+
+      // Move away
+      moveNoBtn();
+    });
+
+    noBtn.addEventListener("mouseover", () => {
+      moveNoBtn();
     });
 
     yesBtn.addEventListener("click", () => {
